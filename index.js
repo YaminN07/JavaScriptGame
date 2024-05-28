@@ -14,13 +14,16 @@ class Player {
 
    draw() {
       c.beginPath()
-      c.arc(this.x, this.y, 30, 0, Math.PI * 2, false)
+      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
       c.fillStyle = this.color
       c.fill()
    }
 }
 
-class Projectile(){
+const x = canvas.width / 2
+const y = canvas.height / 2
+
+class Projectile {
    constructor(x, y, radius, color, velocity){
       this.x = x
       this.y = y
@@ -31,21 +34,41 @@ class Projectile(){
 
    draw() {
        c.beginPath()
-       c.arc(this.x, this.y, 30, 0, Math.PI * 2, false)
+       c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
        c.fillStyle = this.color
        c.fill()
    }
+
+   update() {
+      this.draw()
+      this.x = this.x + this.velocity.x
+      this.y = this.y + this.velocity.y
+   }
 }
 
-const x = canvas.width / 2
-const y = canvas.height / 2
 
 const player = new Player(x, y, 30, 'blue')
 player.draw()
 
+const projectiles = []
+
 console.log(Player)
 
-window.addEventListener('click', ()
-  => {
-   console.log('go')
+function animate() {
+   requestAnimationFrame(animate)
+   projectiles.forEach((projectile) => {
+      projectile.update()
+   })
+}
+
+addEventListener('click', (event) =>
+  {
+  const angle = Math.atan2()
+     projectiles.push(new Projectile( canvas.width / 2, canvas.height / 2, 5, 'red', {
+         x: 1,
+         y: 1
+       })
+     )
   })
+
+animate()
