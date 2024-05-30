@@ -77,7 +77,7 @@ console.log(Player)
 
 function spawnEnemies() {
    setInterval(() => {
-      const radius = 30
+      const radius = Math.random() * (30 - 4) + 4
 
       let x
       let y
@@ -89,7 +89,6 @@ function spawnEnemies() {
          x = Math.random() * canvas.width
          y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius
       }
-
 
       const color = 'green'
 
@@ -115,8 +114,21 @@ function animate() {
       projectile.update()
    })
 
-   enemies.forEach(enemy => {
+   enemies.forEach((enemy, index) => {
       enemy.update()
+
+      projectiles.forEach((projectile, projectileIndex) => {
+         const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)                        //Distance between two points
+
+         // Objects touch
+         if(dist - enemy.radius - projectile.radius < 1) {
+            setTimeout(() => {
+               enemies.splice(index, 1) //remove one at index
+               projectiles.splice(projectileIndex, 1)
+            }, 0) //waits for the next frame to remove it or above code
+
+         }
+      })
    })
 }
 
