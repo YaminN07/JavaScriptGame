@@ -4,7 +4,10 @@ const c = canvas.getContext('2d')  //context
 canvas.width = innerWidth
 canvas.height = innerHeight
 
-class Player {
+const x = canvas.width / 2
+const y = canvas.height / 2
+
+class Player {  // Making the player character
    constructor(x, y, radius, color) {
       this.x = x
       this.y = y
@@ -20,10 +23,7 @@ class Player {
    }
 }
 
-const x = canvas.width / 2
-const y = canvas.height / 2
-
-class Projectile {
+class Projectile {  // Making the small bolets that gets fired
    constructor(x, y, radius, color, velocity){
       this.x = x
       this.y = y
@@ -39,7 +39,7 @@ class Projectile {
        c.fill()
    }
 
-   update() {
+   update() { // The motion of the projectile
       this.draw()
       this.x = this.x + this.velocity.x
       this.y = this.y + this.velocity.y
@@ -62,18 +62,37 @@ class Enemy {
        c.fill()
    }
 
-   update() {
+   update() { // Movement of the enemy
       this.draw()
       this.x = this.x + this.velocity.x
       this.y = this.y + this.velocity.y
    }
 }
 
+class Lightsaber {
+    constructor(x, y, w, h, color){
+       this.x = x
+       this.y = y
+       this.w = w
+       this.h = h
+       this.color = color
+    }
+
+    draw() {
+        c.beginPath()
+        c.arc(x, y, 20, 0, 2 * Math.PI, false)
+        c.fillStyle = this.color
+        c.fill()
+    }
+}
+
 const player = new Player(x, y, 30, 'blue')
+const lightsaber = new Lightsaber(x, y, 150, 1000, 'orange')
 const projectiles = []
 const enemies = []
 
 console.log(Player)
+console.log(Lightsaber)
 
 function spawnEnemies() {
    setInterval(() => {
@@ -101,7 +120,7 @@ function spawnEnemies() {
             y: Math.sin(angle)
         }
 
-      enemies.push( new Enemy(x, y, radius, color, velocity))  //code you want to call
+      enemies.push( new Enemy(x, y, radius, color, velocity))  // This addes the const ( a variable) to the list
       console.log(enemies)
    }, 1000 )                 // time 1000 ms = 1 s
 }
@@ -109,7 +128,8 @@ function spawnEnemies() {
 function animate() {
    requestAnimationFrame(animate)
    c.clearRect(0, 0, canvas.width, canvas.height)
-   player.draw()
+   //player.draw()
+   lightsaber.draw()
    projectiles.forEach((projectile) => {
       projectile.update()
    })
@@ -118,7 +138,7 @@ function animate() {
       enemy.update()
 
       projectiles.forEach((projectile, projectileIndex) => {
-         const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)                        //Distance between two points
+         const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)      //Distance between two points
 
          // Objects touch
          if(dist - enemy.radius - projectile.radius < 1) {
@@ -132,18 +152,18 @@ function animate() {
    })
 }
 
-addEventListener('click', (event) =>
+addEventListener('click', (event) =>  // Adds a listener to listen for mouse clicks
   {
-  const angle = Math.atan2(
-  event.clientY - canvas.height / 2,
-  event.clientX - canvas.width / 2)
-  console.log(angle)
-  const velocity = {
+    const angle = Math.atan2(  // This is to find the angle of the clicked to player
+    event.clientY - canvas.height / 2,
+    event.clientX - canvas.width / 2)
+    console.log(angle)
+    const velocity = {
       x: Math.cos(angle),
       y: Math.sin(angle)
-  }
-  projectiles.push(new Projectile( canvas.width / 2, canvas.height / 2, 5, 'red', velocity)
-   )
+    }
+    projectiles.push(new Projectile( canvas.width / 2, canvas.height / 2, 5, 'red', velocity))
+
   })
 
 animate()
