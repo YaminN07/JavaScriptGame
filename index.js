@@ -137,7 +137,7 @@ let enemies = []
 let particles = []
 
 console.log(Player)
-console.log(Lightsaber)
+//console.log(Lightsaber)
 
 function init() {
    audio.play()
@@ -270,7 +270,7 @@ function animate() {
 addEventListener('click', (event) =>  // Adds a listener to listen for mouse clicks
   {
 
-    console.log(projectiles)
+    //console.log(projectiles)
     const angle = Math.atan2(  // This is to find the angle of the clicked to player
        event.clientY - canvas.height / 2,
        event.clientX - canvas.width / 2
