@@ -1,9 +1,14 @@
-console.log(gsap)
+
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')  //context
 
 canvas.width = innerWidth
 canvas.height = innerHeight
+
+const scoreEl = document.querySelector('#scoreEl')
+const startGameBtn = document.querySelector('#startGameBtn')
+const modalEl = document.querySelector('#modalEl')
+const bigScoreEl = document.querySelector('#bigScoreEl')
 
 const x = canvas.width / 2
 const y = canvas.height / 2
@@ -70,6 +75,7 @@ class Enemy {
    }
 }
 
+const friction = 0.989 //doesn't need to add it
 class Particle {
    constructor(x, y, radius, color, velocity){
       this.x = x
@@ -92,6 +98,8 @@ class Particle {
 
    update() { // Movement of the enemy
       this.draw()
+      this.velocity.x *= friction
+      this.velocity.y *= friction
       this.x = this.x + this.velocity.x
       this.y = this.y + this.velocity.y
       this.alpha -= 0.01
@@ -115,14 +123,25 @@ class Lightsaber {
     }
 }
 
-const player = new Player(x, y, 10, 'white')
-const lightsaber = new Lightsaber(x, y, 150, 1000, 'orange')
-const projectiles = []
-const enemies = []
-const particles = []
+let player = new Player(x, y, 10, 'white')
+let lightsaber = new Lightsaber(x, y, 150, 1000, 'orange')
+let projectiles = []
+let enemies = []
+let particles = []
 
 console.log(Player)
 console.log(Lightsaber)
+
+function init() {
+   player = new Player(x, y, 10, 'white')
+   lightsaber = new Lightsaber(x, y, 150, 1000, 'orange')
+   projectiles = []
+   enemies = []
+   particles = []
+   score = 0
+   scoreEl.innerHTML = score
+   bigScoreEl.innerHTMl = score
+}
 
 function spawnEnemies() {
    setInterval(() => {
@@ -156,7 +175,8 @@ function spawnEnemies() {
    }, 1000 )                 // time 1000 ms = 1 s
 }
 
-let animationId
+let animationId // avaliable that can be acsess in anywhere
+let score = 0
 function animate() {
    animationId = requestAnimationFrame(animate)  // This returns what frame you are on currently
    c.fillStyle = 'rgba(0, 0, 0, 0.1)' // Gives the fade effect to the game; 0.1 changes the style in a way that gives the effect
@@ -164,11 +184,11 @@ function animate() {
    player.draw()
    //lightsaber.draw()
 
-   particles.forEach((particles, index) => {
-      if (particles.alpha <= 0){
+   particles.forEach((particle, index) => {
+      if (particle.alpha <= 0){
          particles.splice(index, 1)
       } else {
-         particles.update()
+         particle.update()
       }
    })
 
@@ -196,6 +216,8 @@ function animate() {
       // end game
       if(dist - enemy.radius - player.radius < 1) {
          cancelAnimationFrame(animationId)
+         modalEl.style.display = 'flex'
+         bigScoreEl.innerHTML = score
       }
 
       projectiles.forEach((projectile, projectileIndex) => {
@@ -203,13 +225,19 @@ function animate() {
 
          // When projectiles touch enemy
          if(dist - enemy.radius - projectile.radius < 1) {
+
+
             // making the particles
-            for(let i = 0; i < 8; i++) {
+            for(let i = 0; i < enemy.radius * 2; i++) {
                particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color,
-               {x: Math.random() - 0.5, y: Math.random() - 0.5})) //random from -0.5 to 0.5
+               {x: Math.random() - 0.5 * (Math.random() * 7), y: Math.random() - 0.5 * (Math.random() * 7)})) //random from -0.5 to 0.5
             }
 
             if(enemy.radius - 7 > 5){ //checks for the bid enemy
+               //Increase the score
+               score += 100
+               scoreEl.innerHTML = score
+
                gsap.to(enemy,{        // for smooth animation
                   radius: enemy.radius -7
                })
@@ -217,6 +245,10 @@ function animate() {
                   projectiles.splice(projectileIndex, 1)
                }, 0) //waits for the next frame to remove it or above code
             } else {
+               // remove from screen altogether
+               score += 250
+               scoreEl.innerHTML = score
+
                setTimeout(() => { // removing something of the screen and the program
                   enemies.splice(index, 1) //remove one at index
                   projectiles.splice(projectileIndex, 1)
@@ -229,6 +261,7 @@ function animate() {
 
 addEventListener('click', (event) =>  // Adds a listener to listen for mouse clicks
   {
+
     console.log(projectiles)
     const angle = Math.atan2(  // This is to find the angle of the clicked to player
        event.clientY - canvas.height / 2,
@@ -243,5 +276,9 @@ addEventListener('click', (event) =>  // Adds a listener to listen for mouse cli
 
   })
 
-animate()
-spawnEnemies()
+startGameBtn.addEventListener('click', () => {
+   init()
+   animate()
+   spawnEnemies()
+   modalEl.style.display = 'none'
+})
