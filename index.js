@@ -9,7 +9,13 @@ const scoreEl = document.querySelector('#scoreEl')
 const startGameBtn = document.querySelector('#startGameBtn')
 const modalEl = document.querySelector('#modalEl')
 const bigScoreEl = document.querySelector('#bigScoreEl')
+const difficultyEL = document.querySelector('#difficultyEl')
+const easyBtn = document.querySelector('#easyBtn')
+const normalBtn = document.querySelector('#normalBtn')
+const hardBtn = document.querySelector('#hardBtn')
+
 let audio = document.querySelector('#audio')
+let speed = 1
 
 const x = canvas.width / 2
 const y = canvas.height / 2
@@ -30,7 +36,7 @@ class Player {  // Making the player character
    }
 }
 
-class Projectile {  // Making the small bolets that gets fired
+class Projectile {  // Making the small bullets that gets fired
    constructor(x, y, radius, color, velocity){
       this.x = x
       this.y = y
@@ -130,18 +136,18 @@ class shotGun {
      }
 }
 
-let player = new Player(x, y, 10, 'white')
+let player = new Player(x, y, 10, 'LightSalmon')
 
 let projectiles = []
 let enemies = []
 let particles = []
 
 console.log(Player)
-//console.log(Lightsaber)
+
 
 function init() {
    audio.play()
-   player = new Player(x, y, 10, 'white')
+   player = new Player(x, y, 10, 'LightSalmon')
    projectiles = []
    enemies = []
    particles = []
@@ -165,7 +171,6 @@ function spawnEnemies() {
          y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius
       }
 
-
       const color = `hsl(${Math.random() * 360}, 50%, 50%)` // random color; hsl-- Hue(color), Saturation & Lightness; computes the code in teh {} before putting in the string
 
       const angle = Math.atan2(
@@ -173,9 +178,9 @@ function spawnEnemies() {
         canvas.width / 2 - x)
       //console.log(angle)
       const velocity = {
-            x: Math.cos(angle),
-            y: Math.sin(angle)
-        }
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+      }
 
       enemies.push( new Enemy(x, y, radius, color, velocity))  // This addes the const ( a variable) to the list
       //console.log(enemies)
@@ -186,7 +191,7 @@ let animationId // avaliable that can be acsess in anywhere
 let score = 0
 function animate() {
    animationId = requestAnimationFrame(animate)  // This returns what frame you are on currently
-   c.fillStyle = 'rgba(0, 0, 0, 0.1)' // Gives the fade effect to the game; 0.1 changes the style in a way that gives the effect
+   c.fillStyle = 'rgba(128, 0, 0, 0.1)' // Gives the fade effect to the game; 0.1 changes the style in a way that gives the effect
    c.fillRect(0, 0, canvas.width, canvas.height) //The background
    player.draw()
    //lightsaber.draw()
@@ -224,6 +229,7 @@ function animate() {
       if(dist - enemy.radius - player.radius < 1) {
          cancelAnimationFrame(animationId)
          audio.currentTime = 0
+         audio.pause
          modalEl.style.display = 'flex'
          bigScoreEl.innerHTML = score
       }
@@ -234,18 +240,27 @@ function animate() {
          // When projectiles touch enemy
          if(dist - enemy.radius - projectile.radius < 1) {
 
+              // making the particles
+            //for(let i = 0; i < enemy.radius * 2; i++) {
+            //   particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color,
+            //   {x: Math.random() - 0.5 * (Math.random() * 7), y: Math.random() - 0.5 * (Math.random() * 7)})) //random from -0.5 to 0.5
+            //}
 
-            // making the particles
-            for(let i = 0; i < enemy.radius * 2; i++) {
-               particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color,
-               {x: Math.random() - 0.5 * (Math.random() * 7), y: Math.random() - 0.5 * (Math.random() * 7)})) //random from -0.5 to 0.5
+            const makeParticles = (num) => {
+                particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color,
+                {x: Math.random() - 0.5 * (Math.random() * 7), y: Math.random() - 0.5 * (Math.random() * 7)}))
+                const updatedNum = num + 1
+                if(updatedNum < enemy.radius * 2){
+                   makeParticles(updatedNum)
+                }
             }
+
+            makeParticles(0)
 
             if(enemy.radius - 7 > 5){ //checks for the bid enemy
                //Increase the score
                score += 100
                scoreEl.innerHTML = score
-
                gsap.to(enemy,{        // for smooth animation
                   radius: enemy.radius -7
                })
@@ -269,7 +284,6 @@ function animate() {
 
 addEventListener('click', (event) =>  // Adds a listener to listen for mouse clicks
   {
-
     //console.log(projectiles)
     const angle = Math.atan2(  // This is to find the angle of the clicked to player
        event.clientY - canvas.height / 2,
@@ -289,4 +303,28 @@ startGameBtn.addEventListener('click', () => {
    animate()
    spawnEnemies()
    modalEl.style.display = 'none'
+})
+
+easyBtn.addEventListener('click', () => {
+//   init()
+//   animate()
+//   spawnEnemies()
+   speed = 0.5
+   difficultyEL.style.display = 'none'
+})
+
+normalBtn.addEventListener('click', () => {
+//   init()
+//   animate()
+//   spawnEnemies()
+   speed = 1
+   difficultyEL.style.display = 'none'
+})
+
+hardBtn.addEventListener('click', () => {
+//   init()
+//   animate()
+//   spawnEnemies()
+   speed = 3
+   difficultyEL.style.display = 'none'
 })
